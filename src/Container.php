@@ -114,10 +114,12 @@ class Container implements ContainerInterface
             /** @var \ReflectionNamedType $dependency */
             $dependency = $parameter->getType();
             $dependencyType = $dependency->getName();
+            // get a new object for the dependency instead of checking for an existing dependency in $parameters
             if (class_exists($dependencyType)) {
                 $dependencies[] = $this->get($dependencyType);
                 continue;
             }
+            // if the current constructor parameter is not a class, use the provided parameter
             $dependencies[] = $parameters[$index];
         }
 

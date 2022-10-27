@@ -174,6 +174,33 @@ final class ContainerTest extends TestCase
     }
 
     /**
+     * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
+     * @throws \ReflectionException
+     */
+    public function testGetObjectByAlias(): void
+    {
+        $abstract = 'alias';
+        $integer = 5;
+        $string = 'five';
+        $expected = [
+            'integer' => $integer,
+            'string' => $string,
+            'object' => InstantiableWithoutParameters::class,
+            'other' => InstantiableWithoutParametersAgain::class,
+        ];
+        $this->fixture->set($abstract, InstantiableWithParameters::class);
+        $this->fixture->set(InstantiableWithoutParameters::class);
+        $this->fixture->set(InstantiableWithoutParametersAgain::class);
+
+        /** @var InstantiableWithParameters $object */
+        $object = $this->fixture->get($abstract, [$integer, $string]);
+        $actual = $object->getAll();
+
+        self::assertSame($expected, $actual);
+    }
+
+    /**
      * @dataProvider hasData
      */
     public function testHas(string $write, string $read, bool $expected): void
@@ -185,6 +212,9 @@ final class ContainerTest extends TestCase
         self::assertSame($expected, $actual);
     }
 
+    /**
+     * @return iterable<string,array<string,string|bool>>
+     */
     public function hasData(): iterable
     {
         yield 'valid id' => [
