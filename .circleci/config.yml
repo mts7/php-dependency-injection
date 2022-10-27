@@ -105,7 +105,6 @@ jobs:
       - store_test_results:
           path: ~/reports/junit.xml
       - run:
-          when: false
           name: Mutation Tests
           command: |
             mv ~/reports/junit.xml reports/coverage-xml/junit.xml
