@@ -1,0 +1,164 @@
+version: 2.1
+
+executors:
+  php-81:
+    docker:
+      - image: cimg/php:8.1
+    resource_class: medium
+
+orbs:
+  php: circleci/php@1.1.0
+
+commands:
+  checkout_code:
+    steps:
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
+      - checkout
+      - run:
+          name: git Garbage Collection
+          command: git gc
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ".git"
+  enable_extensions:
+    steps:
+      - run: pecl config-show
+      - run: mkdir pecl-cache
+      - restore_cache:
+         keys:
+         - pecl-v2-{{ checksum "composer.json" }}
+         - pecl-v2-
+      - run:
+          name: Copying restored pecl extensions cache into extensions directory
+          command: sudo cp -R pecl-cache/. $(pecl config-show | grep ext_dir | awk -F ' ' '{print $(NF)}')
+      - run:
+          name: Install pecl extensions
+          command: |
+            pecl_dir=$(pecl config-show | grep ext_dir | awk -F ' ' '{print $(NF)}')
+            ini_dir=$(php --ini | grep "Scan for additional" | awk -F ': ' '{print $2}')
+
+            if [ ! -f "$pecl_dir/pcov.so" ]; then
+                sudo pecl install pcov
+            fi
+            echo "extension=pcov.so" | sudo tee "$ini_dir/pcov.ini"
+      - run:
+          name: Copying pecl extensions to temp directory which will be cached
+          command: sudo cp -R $(pecl config-show | grep ext_dir | awk -F ' ' '{print $(NF)}')/* pecl-cache/
+      - save_cache:
+          key: pecl-v2-{{ checksum "composer.json" }}
+          paths:
+            - pecl-cache
+  create_reports_directory:
+    steps:
+      - run:
+          name: Create reports directory
+          command: mkdir ~/reports
+  install_composer:
+    steps:
+      - php/install-composer
+  install_composer_packages:
+    steps:
+      - restore_cache:
+          name: Restore Composer Package Cache
+          keys:
+            - composer-v2-{{ checksum "composer.json" }}
+            - composer-v2-
+      - php/install-packages:
+          install-flags: --no-interaction --prefer-dist
+          with-cache: false
+      - save_cache:
+          name: Save Composer Package Cache
+          key: composer-v2-{{ checksum "composer.json" }}
+          paths:
+            - ~/project/vendor
+            - ~/project/composer.lock
+            - ~/.composer/cache
+  init_jobs:
+    steps:
+      - checkout_code
+      - install_composer
+      - install_composer_packages
+
+jobs:
+  test:
+    executor: php-81
+    steps:
+      - init_jobs
+      - enable_extensions
+      - run:
+          name: Unit Tests
+          command: php -d pcov.enabled=1 vendor/bin/phpunit --coverage-html ~/reports/code-coverage --coverage-xml reports/coverage-xml --log-junit ~/reports/junit.xml
+      - store_artifacts:
+          path: ~/reports/code-coverage
+          destination: code-coverage
+      - store_artifacts:
+          path: reports/coverage-xml
+          destination: coverage-xml
+      - store_artifacts:
+          path: ~/reports/junit.xml
+          destination: junit.xml
+      - store_test_results:
+          path: ~/reports/junit.xml
+      - run:
+          when: false
+          name: Mutation Tests
+          command: |
+            mv ~/reports/junit.xml reports/coverage-xml/junit.xml
+            php -d memory_limit=-1 vendor/bin/infection --threads=4 --min-msi=100 --min-covered-msi=100 --coverage=reports/coverage-xml
+      - store_artifacts:
+          path: reports/infection.html
+          destination: infection.html
+  psalm:
+    executor: php-81
+    steps:
+      - init_jobs
+      - create_reports_directory
+      - run:
+          name: Install xsltproc for HTML reporting
+          command: |
+            sudo apt update
+            sudo apt install xsltproc
+      - run:
+          name: Psalm
+          command: vendor/bin/psalm --output-format=xml | xsltproc vendor/roave/psalm-html-output/psalm-html-output.xsl - > ~/reports/psalm.html
+      - store_artifacts:
+          path: ~/reports/psalm.html
+          destination: psalm.html
+  static_analysis:
+    executor: php-81
+    steps:
+      - init_jobs
+      - run:
+          name: PHP Mess Detector
+          command: vendor/bin/phpmd src,tests html phpmd.xml.dist --reportfile ~/reports/phpmd.html
+      - store_artifacts:
+          path: ~/reports/phpmd.html
+          destination: phpmd.html
+      - run:
+          name: PHPStan
+          command: vendor/bin/phpstan analyze --memory-limit=-1 --error-format=prettyJson | tee ~/reports/phpstan.json
+      - store_artifacts:
+          path: ~/reports/phpstan.json
+          destination: phpstan.json
+      - run:
+          name: Psalm Security Analysis
+          command: vendor/bin/psalm --taint-analysis --report=reports/psalm-security.sarif
+      - store_artifacts:
+          path: reports/psalm-security.sarif
+          destination: psalm-security.sarif
+
+workflows:
+  build:
+    jobs:
+      - test
+      - static_analysis:
+          requires:
+            - test
+      - psalm:
+          requires:
+            - test
