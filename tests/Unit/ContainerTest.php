@@ -6,6 +6,7 @@ namespace MtsDependencyInjection\Tests\Unit;
 
 use MtsDependencyInjection\Container;
 use MtsDependencyInjection\Exceptions\ContainerException;
+use MtsDependencyInjection\Exceptions\MissingContainerDefinitionException;
 use MtsDependencyInjection\Tests\Fakes\InstantiableWithoutParameters;
 use MtsDependencyInjection\Tests\Fakes\InstantiableWithoutParametersAgain;
 use MtsDependencyInjection\Tests\Fakes\InstantiableWithParameters;
@@ -74,6 +75,22 @@ final class ContainerTest extends TestCase
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
      * @throws \ReflectionException
      */
+    public function testGetNoInstance(): void
+    {
+        $id = InstantiableWithoutParameters::class;
+        $message = "Create a definition by using `\$container->set('{$id}');` prior to getting the object.";
+
+        $this->expectException(MissingContainerDefinitionException::class);
+        $this->expectErrorMessage($message);
+
+        $this->fixture->get($id);
+    }
+
+    /**
+     * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
+     * @throws \ReflectionException
+     */
     public function testGetClosure(): void
     {
         $abstract = 'closure';
@@ -95,6 +112,7 @@ final class ContainerTest extends TestCase
 
     /**
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
      * @throws \ReflectionException
      */
     public function testGetNotInstantiable(): void
@@ -112,6 +130,7 @@ final class ContainerTest extends TestCase
 
     /**
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
      * @throws \ReflectionException
      */
     public function testGetObject(): void
@@ -129,6 +148,7 @@ final class ContainerTest extends TestCase
 
     /**
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
      * @throws \ReflectionException
      */
     public function testGetObjectByName(): void
@@ -142,6 +162,9 @@ final class ContainerTest extends TestCase
             'object' => InstantiableWithoutParameters::class,
             'other' => InstantiableWithoutParametersAgain::class,
         ];
+        $this->fixture->set($abstract);
+        $this->fixture->set(InstantiableWithoutParameters::class);
+        $this->fixture->set(InstantiableWithoutParametersAgain::class);
 
         /** @var InstantiableWithParameters $object */
         $object = $this->fixture->get($abstract, [$integer, $string]);

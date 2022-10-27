@@ -6,6 +6,7 @@ namespace MtsDependencyInjection;
 
 use Closure;
 use MtsDependencyInjection\Exceptions\ContainerException;
+use MtsDependencyInjection\Exceptions\MissingContainerDefinitionException;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 
@@ -39,13 +40,15 @@ class Container implements ContainerInterface
      * @return mixed|object|null
      *
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
      * @throws \ReflectionException
      */
     public function get(string $id, array $parameters = []): mixed
     {
         if (!isset($this->instances[$id])) {
-            // This violates PSR-11 by not throwing a NotFoundExceptionInterface instance and looking up the class.
-            $this->set($id);
+            throw new MissingContainerDefinitionException(
+                "Create a definition by using `\$container->set('{$id}');` prior to getting the object."
+            );
         }
 
         return $this->resolve($this->instances[$id], $parameters);
@@ -67,6 +70,7 @@ class Container implements ContainerInterface
      * @return object|mixed|null
      *
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
      * @throws \ReflectionException
      *
      * @psalm-suppress PossiblyInvalidCast
@@ -98,6 +102,7 @@ class Container implements ContainerInterface
      * @return array<int,mixed>
      *
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
      * @throws \ReflectionException
      *
      * @psalm-suppress MixedAssignment
