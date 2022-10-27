@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="PHP Dependency Injection" default="check">
+    <target name="check" depends="
+        composer-validate,
+        cs-fix,
+        cs,
+        test-configuration-validate,
+        test,
+        phpstan,
+        psalm,
+        phpmd,
+        psalm-security,
+        mutate
+    "/>
+
+    <target name="composer-validate">
+        <exec
+                executable="composer"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="validate"/>
+            <arg value="--ansi"/>
+        </exec>
+    </target>
+
+    <target name="composer-install">
+        <exec
+                executable="composer"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="install"/>
+            <arg value="--ansi"/>
+        </exec>
+    </target>
+
+    <target name="cs">
+        <exec
+                executable="vendor/bin/phpcs"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        />
+    </target>
+
+    <target name="cs-fix">
+        <exec
+                executable="vendor/bin/phpcbf"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        />
+    </target>
+
+    <target name="test-configuration-validate" depends="composer-install">
+        <xmllint schema="vendor/phpunit/phpunit/phpunit.xsd" file="phpunit.xml.dist"/>
+    </target>
+
+    <target name="test">
+        <exec
+                executable="php"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="-d"/>
+            <arg value="pcov.enabled=1"/>
+            <arg value="vendor/bin/phpunit"/>
+            <arg value="--coverage-text"/>
+            <arg value="--coverage-html=reports/code-coverage"/>
+            <arg value="--coverage-xml=reports/coverage-xml"/>
+            <arg value="--log-junit=reports/junit.xml"/>
+        </exec>
+    </target>
+
+    <target name="phpstan">
+        <exec
+                executable="vendor/bin/phpstan"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="analyse"/>
+            <arg value="--memory-limit=-1"/>
+        </exec>
+    </target>
+
+    <target name="psalm">
+        <exec
+                executable="vendor/bin/psalm"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="--no-cache"/>
+        </exec>
+    </target>
+
+    <target name="phpmd">
+        <exec
+                executable="vendor/bin/phpmd"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="src,tests"/>
+            <arg value="ansi"/>
+            <arg value="phpmd.xml.dist"/>
+        </exec>
+    </target>
+
+    <target name="psalm-security">
+        <exec
+                executable="vendor/bin/psalm"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="--taint-analysis"/>
+            <arg value="--report=reports/psalm-security.sarif"/>
+        </exec>
+    </target>
+
+    <target name="mutate">
+        <exec
+                executable="php"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="-d" />
+            <arg value="memory_limit=-1" />
+            <arg value="vendor/bin/infection" />
+            <arg value="--threads=4" />
+            <arg value="--min-msi=100" />
+            <arg value="--min-covered-msi=100" />
+            <arg value="--coverage=reports" />
+        </exec>
+    </target>
+</project>
