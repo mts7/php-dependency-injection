@@ -44,7 +44,9 @@
                 logoutput="true"
                 passthru="true"
                 checkreturn="true"
-        />
+        >
+            <arg value="-s"/>
+        </exec>
     </target>
 
     <target name="cs-fix">

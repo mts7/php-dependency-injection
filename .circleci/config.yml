@@ -46,6 +46,11 @@ commands:
                 sudo pecl install pcov
             fi
             echo "extension=pcov.so" | sudo tee "$ini_dir/pcov.ini"
+
+            if [ ! -f "$pecl_dir/apcu.so" ]; then
+                echo yes | sudo pecl install apcu
+            fi
+            echo "extension=apcu.so" | sudo tee "$ini_dir/apcu.ini"
       - run:
           name: Copying pecl extensions to temp directory which will be cached
           command: sudo cp -R $(pecl config-show | grep ext_dir | awk -F ' ' '{print $(NF)}')/* pecl-cache/
@@ -69,7 +74,7 @@ commands:
             - composer-v2-{{ checksum "composer.json" }}
             - composer-v2-
       - php/install-packages:
-          install-flags: --no-interaction --prefer-dist
+          install-flags: --no-interaction --prefer-dist --optimize-autoloader --apcu-autoloader
           with-cache: false
       - save_cache:
           name: Save Composer Package Cache
@@ -90,11 +95,12 @@ commands:
           command: composer update --dry-run roave/security-advisories
 
 jobs:
-  check-package-vulnerability:
+  job-init:
     executor: php-81
     steps:
       - init_jobs
       - composer-package-security
+      - enable_extensions
   test:
     executor: php-81
     steps:
@@ -115,7 +121,6 @@ jobs:
       - store_test_results:
           path: ~/reports/junit.xml
       - run:
-          when: false
           name: Mutation Tests
           command: |
             mv ~/reports/junit.xml reports/coverage-xml/junit.xml
@@ -168,13 +173,13 @@ jobs:
 workflows:
   build:
     jobs:
-      - check-package-vulnerability
+      - job-init
       - test:
           requires:
-            - check-package-vulnerability
+            - job-init
       - static_analysis:
           requires:
-            - check-package-vulnerability
+            - job-init
       - psalm:
           requires:
-            - check-package-vulnerability
+            - job-init
