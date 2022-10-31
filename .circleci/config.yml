@@ -83,8 +83,18 @@ commands:
       - checkout_code
       - install_composer
       - install_composer_packages
+  composer-package-security:
+    steps:
+      - run:
+          name: Check for Vulnerable Composer Packages
+          command: composer update --dry-run roave/security-advisories
 
 jobs:
+  check-package-vulnerability:
+    executor: php-81
+    steps:
+      - init_jobs
+      - composer-package-security
   test:
     executor: php-81
     steps:
@@ -134,6 +144,9 @@ jobs:
     steps:
       - init_jobs
       - run:
+          name: Code Standards
+          command: vendor/bin/phpcs -n
+      - run:
           name: PHP Mess Detector
           command: vendor/bin/phpmd src,tests html phpmd.xml.dist --reportfile ~/reports/phpmd.html
       - store_artifacts:
@@ -155,10 +168,13 @@ jobs:
 workflows:
   build:
     jobs:
-      - test
+      - check-package-vulnerability
+      - test:
+          requires:
+            - check-package-vulnerability
       - static_analysis:
           requires:
-            - test
+            - check-package-vulnerability
       - psalm:
           requires:
-            - test
+            - check-package-vulnerability
