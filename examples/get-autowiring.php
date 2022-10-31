@@ -45,8 +45,7 @@ class Car
 }
 
 $container = new Container();
-$container->set(Color::class);
-$container->set(Car::class);
+$container->load([Color::class, Car::class]);
 
 try {
     // there is no need to pass `Color` to the container since all dependencies load automatically

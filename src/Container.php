@@ -16,6 +16,9 @@ use TypeError;
  */
 class Container implements ContainerInterface
 {
+    /**
+     * This is used in a validation of the dependency provided.
+     */
     public const INVALID_DEPENDENCY = 'invalid dependency';
 
     /**

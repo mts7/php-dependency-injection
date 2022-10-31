@@ -7,7 +7,7 @@ PHP Dependency Injection Container
 ### Set
 
 Getting an instantiated object can only happen after the container knows about
-the class. The only way to tell the container about the definition is to use the
+the class. One way to tell the container about the definition is to use the
 `set` method. `set` can take an alias or fully-qualified class name as the first
 parameter and a fully-qualified class name, instantiated object, or null as the
 second parameter.
@@ -30,34 +30,22 @@ $container->set(Car::class);
 $car = $container->get(Car::class);
 ```
 
-### Get
-
-When a class has its own dependencies, all dependencies can exist once they are
-set in the Container. The container uses autowiring through Reflection to
-determine which parameters are classes and then instantiate each one.
-
-[Full Example](examples/get-autowiring.php)
-
-```php
-$container = new Container();
-$container->set(Color::class);
-$container->set(Car::class);
-
-// there is no need to pass `Color` to the container since all dependencies load automatically
-$car = $container->get(Car::class, ['Alice']);
-// getting the color comes from Car's dependency rather than an outside influence
-$car->getColor()->setHex('#F0F8FF');
-echo $car->getName() . ' is ' . $car->getColor()->getHex();
-```
-
 ### Load
 
 To make things easier for projects, passing the abstract and concrete values to
 Container can happen through the `load` method. Provide an array indexed by the
-abstract ID (key, class name, etc.) with a value of a concretion. Load is merely
-an alias for `set` that includes an iterator to set the values. This is best
-used when combined with a factory that provides auto-loading of a preconfigured
-list of abstractions and their concretions.
+abstract ID (key, class name, etc.) with a value of a concretion.
+
+Load handles a variety of parameters, allowing for most implementations to work
+out-of-the-box. When both the key and value are present, the list of definitions
+available adds valid values and their keys. When the config array has no key,
+`load` uses the value to determine the key (which should be the fully-qualified
+class name). Each value goes through validation to determine if the concretion
+provided is a valid class or object. Check the 
+[tests](tests/Unit/ContainerTest.php#LC325) for examples.
+
+Load is best used when combined with a factory that provides auto-loading of a
+preconfigured list of abstractions and their concretions.
 
 [Full Example](examples/load-array.php)
 
@@ -68,4 +56,23 @@ $container = ContainerFactory::create();
 $car = $container->get(Car::class);
 $car->setName('Taco');
 echo $car->getName();
+```
+
+### Get
+
+When a class has its own dependencies, all dependencies can exist once they are
+set in the container. The container uses auto-wiring through Reflection to
+determine which parameters are classes and then instantiate each one.
+
+[Full Example](examples/get-autowiring.php)
+
+```php
+$container = new Container();
+$container->load([Color::class, Car::class]);
+
+// there is no need to pass `Color` to the container since all dependencies load automatically
+$car = $container->get(Car::class, ['Alice']);
+// getting the color comes from Car's dependency rather than an outside influence
+$car->getColor()->setHex('#F0F8FF');
+echo $car->getName() . ' is ' . $car->getColor()->getHex();
 ```
