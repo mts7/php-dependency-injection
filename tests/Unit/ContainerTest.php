@@ -201,6 +201,80 @@ final class ContainerTest extends TestCase
     }
 
     /**
+     * @throws \ReflectionException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
+     * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     */
+    public function testGetObjectDefaultOverwrite(): void
+    {
+        $this->fixture->set(InstantiableWithoutParameters::class);
+        $this->fixture->set(InstantiableWithoutParametersAgain::class);
+        /** @var InstantiableWithoutParameters $without1 */
+        $without1 = $this->fixture->get(InstantiableWithoutParameters::class);
+        /** @var InstantiableWithoutParametersAgain $without2 */
+        $without2 = $this->fixture->get(InstantiableWithoutParametersAgain::class);
+        $defaults = [
+            'integer' => 206,
+            'string' => 'two hundred six',
+        ];
+        $this->fixture->set(
+            InstantiableWithParameters::class,
+            new InstantiableWithParameters(
+                $defaults['integer'],
+                $defaults['string'],
+                $without1,
+                $without2,
+            )
+        );
+        $parameters = [
+            5,
+            'five',
+        ];
+
+        /** @var InstantiableWithParameters $object */
+        $object = $this->fixture->get(InstantiableWithParameters::class, $parameters);
+        $actual = $object->getAll();
+
+        self::assertSame($parameters[0], $actual['integer']);
+        self::assertSame($parameters[1], $actual['string']);
+    }
+
+    /**
+     * @throws \ReflectionException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
+     * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     */
+    public function testGetObjectWithDefault(): void
+    {
+        $this->fixture->set(InstantiableWithoutParameters::class);
+        $this->fixture->set(InstantiableWithoutParametersAgain::class);
+        /** @var InstantiableWithoutParameters $without1 */
+        $without1 = $this->fixture->get(InstantiableWithoutParameters::class);
+        /** @var InstantiableWithoutParametersAgain $without2 */
+        $without2 = $this->fixture->get(InstantiableWithoutParametersAgain::class);
+        $defaults = [
+            'integer' => 206,
+            'string' => 'two hundred six',
+        ];
+        $this->fixture->set(
+            InstantiableWithParameters::class,
+            new InstantiableWithParameters(
+                $defaults['integer'],
+                $defaults['string'],
+                $without1,
+                $without2,
+            )
+        );
+
+        /** @var InstantiableWithParameters $object */
+        $object = $this->fixture->get(InstantiableWithParameters::class);
+        $actual = $object->getAll();
+
+        self::assertSame($defaults['integer'], $actual['integer']);
+        self::assertSame($defaults['string'], $actual['string']);
+    }
+
+    /**
      * @dataProvider hasData
      */
     public function testHas(string $write, string $read, bool $expected): void

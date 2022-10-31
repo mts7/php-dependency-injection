@@ -9,7 +9,6 @@ namespace MtsDependencyInjection\Tests\Fakes;
  */
 final class InstantiableWithParameters
 {
-    /** @psalm-suppress PossiblyUnusedMethod */
     public function __construct(
         private readonly int $integer,
         private readonly string $string,

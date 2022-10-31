@@ -9,6 +9,7 @@ use MtsDependencyInjection\Exceptions\ContainerException;
 use MtsDependencyInjection\Exceptions\MissingContainerDefinitionException;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
+use TypeError;
 
 /**
  * @see https://medium.com/tech-tajawal/dependency-injection-di-container-in-php-a7e5d309ccc6
@@ -45,7 +46,7 @@ class Container implements ContainerInterface
      */
     public function get(string $id, array $parameters = []): mixed
     {
-        if (!isset($this->instances[$id])) {
+        if (!$this->has($id)) {
             throw new MissingContainerDefinitionException(
                 "Create a definition by using `\$container->set('{$id}');` prior to getting the object."
             );
@@ -82,8 +83,6 @@ class Container implements ContainerInterface
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
      * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
      * @throws \ReflectionException
-     *
-     * @psalm-suppress PossiblyInvalidCast
      */
     private function resolve(object|string $concrete, array $parameters): mixed
     {
@@ -91,6 +90,30 @@ class Container implements ContainerInterface
             return call_user_func_array($concrete, $parameters);
         }
 
+        try {
+            if (empty($parameters) && !empty($concrete::class)) {
+                // get the instantiated object as a default
+                return $concrete;
+            }
+        // @phpstan-ignore-next-line
+        } catch (TypeError) {
+        }
+
+        return $this->autoWire($concrete, $parameters);
+    }
+
+    /**
+     * @param class-string|object $concrete
+     *
+     * @return mixed|object|null
+     * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
+     * @throws \ReflectionException
+     *
+     * @psalm-suppress PossiblyInvalidCast
+     */
+    private function autoWire(object|string $concrete, array $parameters): mixed
+    {
         $reflector = new ReflectionClass($concrete);
         if (!$reflector->isInstantiable()) {
             throw new ContainerException("Class {$concrete} is not instantiable.");
@@ -121,16 +144,17 @@ class Container implements ContainerInterface
     {
         $dependencies = [];
         foreach ($reflectionParameters as $index => $parameter) {
+            if (array_key_exists($index, $parameters)) {
+                $dependencies[] = $parameters[$index];
+                continue;
+            }
             /** @var \ReflectionNamedType $dependency */
             $dependency = $parameter->getType();
             $dependencyType = $dependency->getName();
             // get a new object for the dependency instead of checking for an existing dependency in $parameters
             if (class_exists($dependencyType)) {
                 $dependencies[] = $this->get($dependencyType);
-                continue;
             }
-            // if the current constructor parameter is not a class, use the provided parameter
-            $dependencies[] = $parameters[$index];
         }
 
         return $dependencies;
