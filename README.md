@@ -2,6 +2,12 @@
 
 PHP Dependency Injection Container
 
+## Installation
+
+```shell
+composer require mts7/php-dependency-injection
+```
+
 ## Usage
 
 ### Set
