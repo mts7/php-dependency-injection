@@ -46,6 +46,11 @@ commands:
                 sudo pecl install pcov
             fi
             echo "extension=pcov.so" | sudo tee "$ini_dir/pcov.ini"
+
+            if [ ! -f "$pecl_dir/apcu.so" ]; then
+                sudo pecl install apcu
+            fi
+            echo "extension=apcu.so" | sudo tee "$ini_dir/apcu.ini"
       - run:
           name: Copying pecl extensions to temp directory which will be cached
           command: sudo cp -R $(pecl config-show | grep ext_dir | awk -F ' ' '{print $(NF)}')/* pecl-cache/
@@ -69,7 +74,7 @@ commands:
             - composer-v2-{{ checksum "composer.json" }}
             - composer-v2-
       - php/install-packages:
-          install-flags: --no-interaction --prefer-dist
+          install-flags: --no-interaction --prefer-dist --optimize-autoloader --apcu-autoloader
           with-cache: false
       - save_cache:
           name: Save Composer Package Cache
