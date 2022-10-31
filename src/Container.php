@@ -59,6 +59,16 @@ class Container implements ContainerInterface
         return array_key_exists($id, $this->instances);
     }
 
+    /**
+     * @param array<string,class-string|object|null> $config
+     */
+    public function load(array $config): void
+    {
+        foreach ($config as $abstract => $concrete) {
+            $this->set($abstract, $concrete);
+        }
+    }
+
     public function view(): array
     {
         return $this->instances;

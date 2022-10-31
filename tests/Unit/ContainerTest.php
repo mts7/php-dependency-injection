@@ -229,4 +229,44 @@ final class ContainerTest extends TestCase
             'expected' => false,
         ];
     }
+
+    /**
+     * @param array<string,class-string|object|null> $config
+     * @param array<string,bool> $expected
+     *
+     * @dataProvider loadData
+     */
+    public function testLoad(array $config, array $expected): void
+    {
+        $this->fixture->load($config);
+
+        foreach ($expected as $key => $value) {
+            self::assertSame($value, $this->fixture->has($key));
+        }
+    }
+
+    /**
+     * @return iterable<string,array<string,array>>
+     */
+    public function loadData(): iterable
+    {
+        yield 'various concrete types' => [
+            'config' => [
+                'null' => null,
+                'string' => 'string',
+                'closure' => static function () {
+                },
+                'object' => new stdClass(),
+                'class' => InstantiableWithoutParameters::class,
+            ],
+            'expected' => [
+                'null' => true,
+                'non-existent' => false,
+                'string' => true,
+                'closure' => true,
+                'object' => true,
+                'class' => true,
+            ],
+        ];
+    }
 }

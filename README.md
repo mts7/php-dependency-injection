@@ -4,6 +4,8 @@ PHP Dependency Injection Container
 
 ## Usage
 
+### Set
+
 Getting an instantiated object can only happen after the container knows about
 the class. The only way to tell the container about the definition is to use the
 `set` method. `set` can take an alias or fully-qualified class name as the first
@@ -28,6 +30,8 @@ $container->set(Car::class);
 $car = $container->get(Car::class);
 ```
 
+### Get
+
 When a class has its own dependencies, all dependencies can exist once they are
 set in the Container. The container uses autowiring through Reflection to
 determine which parameters are classes and then instantiate each one.
@@ -44,4 +48,24 @@ $car = $container->get(Car::class, ['Alice']);
 // getting the color comes from Car's dependency rather than an outside influence
 $car->getColor()->setHex('#F0F8FF');
 echo $car->getName() . ' is ' . $car->getColor()->getHex();
+```
+
+### Load
+
+To make things easier for projects, passing the abstract and concrete values to
+Container can happen through the `load` method. Provide an array indexed by the
+abstract ID (key, class name, etc.) with a value of a concretion. Load is merely
+an alias for `set` that includes an iterator to set the values. This is best
+used when combined with a factory that provides auto loading of a preconfigured
+list of abstractions and their concretions.
+
+[Full Example](examples/load-array.php)
+
+```php
+// the factory would create a new Container, then call ->load($config) with the appropriate values
+$container = ContainerFactory::create();
+
+$car = $container->get(Car::class);
+$car->setName('Taco');
+echo $car->getName();
 ```
