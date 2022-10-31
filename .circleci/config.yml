@@ -48,7 +48,7 @@ commands:
             echo "extension=pcov.so" | sudo tee "$ini_dir/pcov.ini"
 
             if [ ! -f "$pecl_dir/apcu.so" ]; then
-                sudo pecl install apcu
+                yes '' | sudo pecl install apcu
             fi
             echo "extension=apcu.so" | sudo tee "$ini_dir/apcu.ini"
       - run:
