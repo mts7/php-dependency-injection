@@ -56,7 +56,7 @@ To make things easier for projects, passing the abstract and concrete values to
 Container can happen through the `load` method. Provide an array indexed by the
 abstract ID (key, class name, etc.) with a value of a concretion. Load is merely
 an alias for `set` that includes an iterator to set the values. This is best
-used when combined with a factory that provides auto loading of a preconfigured
+used when combined with a factory that provides auto-loading of a preconfigured
 list of abstractions and their concretions.
 
 [Full Example](examples/load-array.php)

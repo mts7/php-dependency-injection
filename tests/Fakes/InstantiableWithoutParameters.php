@@ -9,7 +9,6 @@ namespace MtsDependencyInjection\Tests\Fakes;
  */
 final class InstantiableWithoutParameters
 {
-    /** @psalm-suppress PossiblyUnusedMethod */
     public function __construct()
     {
     }

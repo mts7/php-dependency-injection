@@ -16,6 +16,8 @@ use TypeError;
  */
 class Container implements ContainerInterface
 {
+    public const INVALID_DEPENDENCY = 'invalid dependency';
+
     /**
      * @var array<string,class-string|object> $instances
      */
@@ -61,18 +63,42 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param array<string,class-string|object|null> $config
+     * @param array<string|int,class-string|object|null> $config
      */
     public function load(array $config): void
     {
         foreach ($config as $abstract => $concrete) {
-            $this->set($abstract, $concrete);
+            $prepared = $this->prepareAbstraction($concrete);
+            if ($prepared === self::INVALID_DEPENDENCY) {
+                continue;
+            }
+            $this->set(is_int($abstract) ? $prepared : $abstract, $concrete);
         }
     }
 
     public function view(): array
     {
         return $this->instances;
+    }
+
+    /**
+     * @param object|class-string|null $concrete
+     */
+    private function prepareAbstraction(object|string|null $concrete): string
+    {
+        if ($concrete === null) {
+            return self::INVALID_DEPENDENCY;
+        }
+
+        if (is_string($concrete)) {
+            if (class_exists($concrete)) {
+                return $concrete;
+            }
+
+            return self::INVALID_DEPENDENCY;
+        }
+
+        return $concrete::class;
     }
 
     /**
@@ -95,7 +121,7 @@ class Container implements ContainerInterface
                 // get the instantiated object as a default
                 return $concrete;
             }
-        // @phpstan-ignore-next-line
+            // @phpstan-ignore-next-line
         } catch (TypeError) {
         }
 

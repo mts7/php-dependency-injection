@@ -305,7 +305,7 @@ final class ContainerTest extends TestCase
     }
 
     /**
-     * @param array<string,class-string|object|null> $config
+     * @param array<string|int,class-string|object|null> $config
      * @param array<string,bool> $expected
      *
      * @dataProvider loadData
@@ -320,26 +320,49 @@ final class ContainerTest extends TestCase
     }
 
     /**
-     * @return iterable<string,array<string,array>>
+     * @return iterable<string|int,array<string,array>>
      */
     public function loadData(): iterable
     {
-        yield 'various concrete types' => [
+        yield 'various types' => [
             'config' => [
-                'null' => null,
-                'string' => 'string',
                 'closure' => static function () {
                 },
                 'object' => new stdClass(),
-                'class' => InstantiableWithoutParameters::class,
+                new InstantiableWithoutParameters(),
             ],
             'expected' => [
-                'null' => true,
-                'non-existent' => false,
-                'string' => true,
                 'closure' => true,
                 'object' => true,
+                InstantiableWithoutParameters::class => true,
+            ],
+        ];
+
+        yield 'string types' => [
+            'config' => [
+                'string' => 'string',
+                'banana',
+                'class' => InstantiableWithoutParameters::class,
+                InstantiableWithoutParametersAgain::class,
+                'alias' => InstantiableWithoutParametersAgain::class,
+            ],
+            'expected' => [
+                'string' => false,
+                'banana' => false,
+                'non-existent' => false,
                 'class' => true,
+                InstantiableWithoutParametersAgain::class => true,
+                'alias' => true,
+            ],
+        ];
+
+        yield 'null types' => [
+            'config' => [
+                'null' => null,
+                null,
+            ],
+            'expected' => [
+                'null' => false,
             ],
         ];
     }
