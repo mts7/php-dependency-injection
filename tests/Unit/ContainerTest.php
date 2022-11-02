@@ -7,6 +7,9 @@ namespace MtsDependencyInjection\Tests\Unit;
 use MtsDependencyInjection\Container;
 use MtsDependencyInjection\Exceptions\ContainerException;
 use MtsDependencyInjection\Exceptions\MissingContainerDefinitionException;
+use MtsDependencyInjection\Tests\Fakes\DependencyOfAbstraction;
+use MtsDependencyInjection\Tests\Fakes\FakeInterface;
+use MtsDependencyInjection\Tests\Fakes\InstantiableWithInterface;
 use MtsDependencyInjection\Tests\Fakes\InstantiableWithoutParameters;
 use MtsDependencyInjection\Tests\Fakes\InstantiableWithoutParametersAgain;
 use MtsDependencyInjection\Tests\Fakes\InstantiableWithParameters;
@@ -19,6 +22,7 @@ use stdClass;
  * @psalm-suppress UnusedClass
  * @psalm-suppress MissingThrowsDocblock
  * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+ * @noinspection EfferentObjectCouplingInspection
  */
 final class ContainerTest extends TestCase
 {
@@ -275,6 +279,20 @@ final class ContainerTest extends TestCase
     }
 
     /**
+     * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
+     * @throws \ReflectionException
+     */
+    public function testGetInterfaceObject(): void
+    {
+        $this->fixture->load([DependencyOfAbstraction::class, FakeInterface::class => InstantiableWithInterface::class]);
+
+        $object = $this->fixture->get(DependencyOfAbstraction::class);
+
+        self::assertNotNull($object);
+    }
+
+    /**
      * @dataProvider hasData
      */
     public function testHas(string $write, string $read, bool $expected): void
@@ -330,11 +348,15 @@ final class ContainerTest extends TestCase
                 },
                 'object' => new stdClass(),
                 new InstantiableWithoutParameters(),
+                FakeInterface::class => InstantiableWithInterface::class,
+                Uninstantiable::class,
             ],
             'expected' => [
                 'closure' => true,
                 'object' => true,
                 InstantiableWithoutParameters::class => true,
+                FakeInterface::class => true,
+                Uninstantiable::class => true,
             ],
         ];
 

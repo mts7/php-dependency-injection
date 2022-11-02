@@ -181,7 +181,7 @@ class Container implements ContainerInterface
             $dependency = $parameter->getType();
             $dependencyType = $dependency->getName();
             // get a new object for the dependency instead of checking for an existing dependency in $parameters
-            if (class_exists($dependencyType)) {
+            if (class_exists($dependencyType) || $this->has($dependencyType)) {
                 $dependencies[] = $this->get($dependencyType);
             }
         }
