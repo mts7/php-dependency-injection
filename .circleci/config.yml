@@ -13,6 +13,7 @@ commands:
   checkout_code:
     steps:
       - restore_cache:
+          name: Restoring source code cache
           keys:
             - source-v1-{{ .Branch }}-{{ .Revision }}
             - source-v1-{{ .Branch }}-
@@ -22,17 +23,19 @@ commands:
           name: git Garbage Collection
           command: git gc
       - save_cache:
+          name: Saving source code cache
           key: source-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - ".git"
   enable_extensions:
     steps:
-      - run: pecl config-show
-      - run: mkdir pecl-cache
+      - run:
+          name: Making a pecl-cache directory
+          command: mkdir pecl-cache
       - restore_cache:
-         keys:
-         - pecl-v2-{{ checksum "composer.json" }}
-         - pecl-v2-
+          name: Restoring PECL cache
+          keys:
+            - pecl-v2-{{ checksum "composer.json" }}
       - run:
           name: Copying restored pecl extensions cache into extensions directory
           command: sudo cp -R pecl-cache/. $(pecl config-show | grep ext_dir | awk -F ' ' '{print $(NF)}')
@@ -55,6 +58,7 @@ commands:
           name: Copying pecl extensions to temp directory which will be cached
           command: sudo cp -R $(pecl config-show | grep ext_dir | awk -F ' ' '{print $(NF)}')/* pecl-cache/
       - save_cache:
+          name: Saving PECL cache
           key: pecl-v2-{{ checksum "composer.json" }}
           paths:
             - pecl-cache
@@ -71,14 +75,13 @@ commands:
       - restore_cache:
           name: Restore Composer Package Cache
           keys:
-            - composer-v2-{{ checksum "composer.json" }}
-            - composer-v2-
+            - composer-v3-{{ checksum "composer.json" }}
       - php/install-packages:
           install-flags: --no-interaction --prefer-dist --optimize-autoloader --apcu-autoloader
           with-cache: false
       - save_cache:
           name: Save Composer Package Cache
-          key: composer-v2-{{ checksum "composer.json" }}
+          key: composer-v3-{{ checksum "composer.json" }}
           paths:
             - ~/project/vendor
             - ~/project/composer.lock
@@ -88,18 +91,24 @@ commands:
       - checkout_code
       - install_composer
       - install_composer_packages
-  composer-package-security:
+  composer_package_security:
     steps:
       - run:
           name: Check for Vulnerable Composer Packages
           command: composer update --dry-run roave/security-advisories
+  check_composer_unused:
+    steps:
+      - run:
+          name: Check for unused Composer dependencies
+          command: vendor/bin/composer-unused
 
 jobs:
   job-init:
     executor: php-81
     steps:
       - init_jobs
-      - composer-package-security
+      - composer_package_security
+      - check_composer_unused
       - enable_extensions
   test:
     executor: php-81
@@ -124,7 +133,7 @@ jobs:
           name: Mutation Tests
           command: |
             mv ~/reports/junit.xml reports/coverage-xml/junit.xml
-            php -d memory_limit=-1 vendor/bin/infection --threads=4 --min-msi=100 --min-covered-msi=100 --coverage=reports/coverage-xml
+            php -d memory_limit=-1 vendor/bin/infection --threads=4 --min-msi=100 --min-covered-msi=100 --coverage=reports/coverage-xml --skip-initial-tests
       - store_artifacts:
           path: reports/infection.html
           destination: infection.html
@@ -148,6 +157,9 @@ jobs:
     executor: php-81
     steps:
       - init_jobs
+      - run:
+          name: Lint
+          command: vendor/bin/parallel-lint --exclude .git --exclude vendor --colors .
       - run:
           name: Code Standards
           command: vendor/bin/phpcs -n
