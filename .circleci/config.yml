@@ -30,6 +30,7 @@ commands:
       - run: pecl config-show
       - run: mkdir pecl-cache
       - restore_cache:
+          name: Restoring PECL cache
           keys:
             - pecl-v2-{{ checksum "composer.json" }}
       - run:
@@ -54,6 +55,7 @@ commands:
           name: Copying pecl extensions to temp directory which will be cached
           command: sudo cp -R $(pecl config-show | grep ext_dir | awk -F ' ' '{print $(NF)}')/* pecl-cache/
       - save_cache:
+          name: Saving PECL cache
           key: pecl-v2-{{ checksum "composer.json" }}
           paths:
             - pecl-cache
