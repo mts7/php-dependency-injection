@@ -13,6 +13,7 @@ commands:
   checkout_code:
     steps:
       - restore_cache:
+          name: Restoring source code cache
           keys:
             - source-v1-{{ .Branch }}-{{ .Revision }}
             - source-v1-{{ .Branch }}-
@@ -22,13 +23,15 @@ commands:
           name: git Garbage Collection
           command: git gc
       - save_cache:
+          name: Saving source code cache
           key: source-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - ".git"
   enable_extensions:
     steps:
-      - run: pecl config-show
-      - run: mkdir pecl-cache
+      - run:
+          name: Making a pecl-cache directory
+          command: mkdir pecl-cache
       - restore_cache:
           name: Restoring PECL cache
           keys:
