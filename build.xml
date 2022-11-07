@@ -3,6 +3,9 @@
 <project name="PHP Dependency Injection" default="check">
     <target name="check" depends="
         composer-validate,
+        composer-package-security,
+        composer-unused,
+        lint,
         cs-fix,
         cs,
         test-configuration-validate,
@@ -35,6 +38,42 @@
         >
             <arg value="install"/>
             <arg value="--ansi"/>
+        </exec>
+    </target>
+
+    <target name="composer-package-security">
+        <exec
+                executable="composer"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="update"/>
+            <arg value="--dry-run"/>
+            <arg value="roave/security-advisories"/>
+        </exec>
+    </target>
+
+    <target name="composer-unused">
+        <exec
+                executable="vendor/bin/composer-unused"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+        </exec>
+    </target>
+
+    <target name="lint">
+        <exec
+                executable="vendor/bin/parallel-lint"
+                logoutput="true"
+                passthru="true"
+                checkreturn="true"
+        >
+            <arg value="--colors" />
+            <arg path="src" />
+            <arg path="tests" />
         </exec>
     </target>
 
@@ -141,6 +180,7 @@
             <arg value="--min-msi=100" />
             <arg value="--min-covered-msi=100" />
             <arg value="--coverage=reports" />
+            <arg value="--skip-initial-tests" />
         </exec>
     </target>
 </project>

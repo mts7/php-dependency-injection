@@ -138,14 +138,14 @@ class Container implements ContainerInterface
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
      * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
      * @throws \ReflectionException
-     *
-     * @psalm-suppress PossiblyInvalidCast
      */
     private function autoWire(object|string $concrete, array $parameters): mixed
     {
         $reflector = new ReflectionClass($concrete);
         if (!$reflector->isInstantiable()) {
-            throw new ContainerException("Class {$concrete} is not instantiable.");
+            $class = is_string($concrete) ? $concrete : $concrete::class;
+
+            throw new ContainerException("Class {$class} is not instantiable.");
         }
 
         $constructor = $reflector->getConstructor();
