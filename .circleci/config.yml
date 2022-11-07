@@ -32,7 +32,6 @@ commands:
       - restore_cache:
           keys:
             - pecl-v2-{{ checksum "composer.json" }}
-            - pecl-v2-
       - run:
           name: Copying restored pecl extensions cache into extensions directory
           command: sudo cp -R pecl-cache/. $(pecl config-show | grep ext_dir | awk -F ' ' '{print $(NF)}')
@@ -72,7 +71,6 @@ commands:
           name: Restore Composer Package Cache
           keys:
             - composer-v2-{{ checksum "composer.json" }}
-            - composer-v2-
       - php/install-packages:
           install-flags: --no-interaction --prefer-dist --optimize-autoloader --apcu-autoloader
           with-cache: false
