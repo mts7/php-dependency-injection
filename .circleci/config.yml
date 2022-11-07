@@ -70,13 +70,13 @@ commands:
       - restore_cache:
           name: Restore Composer Package Cache
           keys:
-            - composer-v2-{{ checksum "composer.json" }}
+            - composer-v3-{{ checksum "composer.json" }}
       - php/install-packages:
           install-flags: --no-interaction --prefer-dist --optimize-autoloader --apcu-autoloader
           with-cache: false
       - save_cache:
           name: Save Composer Package Cache
-          key: composer-v2-{{ checksum "composer.json" }}
+          key: composer-v3-{{ checksum "composer.json" }}
           paths:
             - ~/project/vendor
             - ~/project/composer.lock
