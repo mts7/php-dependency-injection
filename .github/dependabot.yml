@@ -8,3 +8,4 @@ updates:
     target-branch: "master"
     pull-request-branch-name:
       separator: "-"
+    versioning-strategy: increase
