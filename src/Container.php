@@ -138,6 +138,8 @@ class Container implements ContainerInterface
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
      * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
      * @throws \ReflectionException
+     *
+     * @psalm-suppress ArgumentTypeCoercion
      */
     private function autoWire(object|string $concrete, array $parameters): mixed
     {
@@ -161,7 +163,7 @@ class Container implements ContainerInterface
     /**
      * @param \ReflectionParameter[] $reflectionParameters
      *
-     * @return array<int,mixed>
+     * @return array<int, mixed>
      *
      * @throws \MtsDependencyInjection\Exceptions\ContainerException
      * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException

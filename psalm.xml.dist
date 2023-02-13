@@ -11,7 +11,7 @@
     findUnusedVariablesAndParams="true"
     findUnusedCode="true"
     findUnusedPsalmSuppress="true"
-    phpVersion="8.1"
+    findUnusedBaselineEntry="true"
 >
     <projectFiles>
         <directory name="src" />
