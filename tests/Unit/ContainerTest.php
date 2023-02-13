@@ -52,7 +52,7 @@ final class ContainerTest extends TestCase
     /**
      * @return iterable<string,array<string,string|object|array<string,string|object>|null>>
      */
-    public function setViewData(): iterable
+    public static function setViewData(): iterable
     {
         $object = new stdClass();
 
@@ -307,7 +307,7 @@ final class ContainerTest extends TestCase
     /**
      * @return iterable<string,array<string,string|bool>>
      */
-    public function hasData(): iterable
+    public static function hasData(): iterable
     {
         yield 'valid id' => [
             'write' => 'stdClass',
@@ -340,7 +340,7 @@ final class ContainerTest extends TestCase
     /**
      * @return iterable<string|int,array<string,array>>
      */
-    public function loadData(): iterable
+    public static function loadData(): iterable
     {
         yield 'various types' => [
             'config' => [
