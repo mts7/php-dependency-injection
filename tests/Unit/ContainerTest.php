@@ -85,7 +85,7 @@ final class ContainerTest extends TestCase
         $message = "Create a definition by using `\$container->set('{$id}');` prior to getting the object.";
 
         $this->expectException(MissingContainerDefinitionException::class);
-        $this->expectErrorMessage($message);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->get($id);
     }
@@ -127,7 +127,7 @@ final class ContainerTest extends TestCase
         $message = "Class {$concrete} is not instantiable.";
 
         $this->expectException(ContainerException::class);
-        $this->expectErrorMessage($message);
+        $this->expectExceptionMessage($message);
 
         $this->fixture->get($abstract);
     }
