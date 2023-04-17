@@ -9,7 +9,7 @@
     },
     "require-dev": {
         "mts7/php-code-quality": "^0.1.8",
-        "phpunit/phpunit": "^10.0",
+        "phpunit/phpunit": "^10.1",
         "roave/security-advisories": "dev-latest"
     },
     "provide": {
