@@ -8,7 +8,7 @@
         "php": "^8.1"
     },
     "require-dev": {
-        "mts7/php-code-quality": "^0.1.8",
+        "mts7/php-code-quality": "^0.1.9",
         "phpunit/phpunit": "^10.1",
         "roave/security-advisories": "dev-latest"
     },
