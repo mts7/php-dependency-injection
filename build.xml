@@ -111,6 +111,8 @@
             <arg value="-d"/>
             <arg value="pcov.enabled=1"/>
             <arg value="vendor/bin/phpunit"/>
+            <arg value="--coverage-filter"/>
+            <arg value="src/"/>
             <arg value="--coverage-text"/>
             <arg value="--coverage-html=reports/code-coverage"/>
             <arg value="--coverage-xml=reports/coverage-xml"/>
