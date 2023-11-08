@@ -14,11 +14,6 @@
             <directory>tests/Unit</directory>
         </testsuite>
     </testsuites>
-    <coverage>
-        <include>
-            <directory>src/</directory>
-        </include>
-    </coverage>
     <php>
         <ini name="memory_limit" value="-1"/>
         <ini name="error_reporting" value="-1"/>
