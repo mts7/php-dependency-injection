@@ -13,6 +13,7 @@ use MtsDependencyInjection\Tests\Fakes\InstantiableWithInterface;
 use MtsDependencyInjection\Tests\Fakes\InstantiableWithoutParameters;
 use MtsDependencyInjection\Tests\Fakes\InstantiableWithoutParametersAgain;
 use MtsDependencyInjection\Tests\Fakes\InstantiableWithParameters;
+use MtsDependencyInjection\Tests\Fakes\InstantiableWithParametersDoNotExist;
 use MtsDependencyInjection\Tests\Fakes\Uninstantiable;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -387,5 +388,18 @@ final class ContainerTest extends TestCase
                 'null' => false,
             ],
         ];
+    }
+
+    /**
+     * @throws \MtsDependencyInjection\Exceptions\ContainerException
+     * @throws \MtsDependencyInjection\Exceptions\MissingContainerDefinitionException
+     * @throws \ReflectionException
+     */
+    public function testClassDoesNotExist(): void
+    {
+        $this->expectException(\ArgumentCountError::class);
+
+        $this->fixture->set('undefinedClass', InstantiableWithParametersDoNotExist::class);
+        $this->fixture->get('undefinedClass');
     }
 }
