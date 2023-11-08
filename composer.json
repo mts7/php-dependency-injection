@@ -9,7 +9,7 @@
     },
     "require-dev": {
         "mts7/php-code-quality": "^0.1.9",
-        "phpunit/phpunit": "^10.1",
+        "phpunit/phpunit": "^10.2",
         "roave/security-advisories": "dev-latest"
     },
     "provide": {
@@ -31,7 +31,8 @@
         },
         "allow-plugins": {
             "infection/extension-installer": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
         }
     }
 }

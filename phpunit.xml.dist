@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.4/phpunit.xsd" bootstrap="vendor/autoload.php" beStrictAboutChangesToGlobalState="true" beStrictAboutOutputDuringTests="true" colors="true" cacheDirectory=".phpunit.cache" cacheResult="false" executionOrder="random">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.4/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         beStrictAboutChangesToGlobalState="true"
+         beStrictAboutOutputDuringTests="true"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         cacheResult="false"
+         executionOrder="random"
+>
   <testsuites>
     <testsuite name="Test Suite">
       <directory>tests/Unit</directory>
@@ -7,7 +16,7 @@
   </testsuites>
   <source>
     <include>
-      <directory suffix=".php">src</directory>
+      <directory>src</directory>
     </include>
   </source>
   <php>
