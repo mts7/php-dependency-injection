@@ -35,7 +35,6 @@ class Container implements ContainerInterface
         if ($concrete === null) {
             /**
              * @var class-string $concrete
-             * @noinspection PhpRedundantVariableDocTypeInspection
              */
             $concrete = $abstract;
         }
