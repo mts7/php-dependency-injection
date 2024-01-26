@@ -35,7 +35,6 @@ class Container implements ContainerInterface
         if ($concrete === null) {
             /**
              * @var class-string $concrete
-             * @noinspection PhpRedundantVariableDocTypeInspection
              */
             $concrete = $abstract;
         }
@@ -120,6 +119,9 @@ class Container implements ContainerInterface
         }
 
         try {
+            /**
+             * @psalm-suppress RedundantCondition
+             */
             if (empty($parameters) && !empty($concrete::class)) {
                 // get the instantiated object as a default
                 return $concrete;
