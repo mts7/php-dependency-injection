@@ -117,7 +117,7 @@ jobs:
       - enable_extensions
       - run:
           name: Unit Tests
-          command: php -d pcov.enabled=1 vendor/bin/phpunit --coverage-filter src/ --coverage-html ~/reports/code-coverage --coverage-xml reports/coverage-xml --log-junit ~/reports/junit.xml
+          command: php -d pcov.enabled=1 vendor/bin/phpunit --coverage-filter src/ --coverage-html ~/reports/code-coverage --coverage-xml reports/coverage-xml --log-junit ~/reports/junit.xml --coverage-clover ~/reports/clover.xml
       - store_artifacts:
           path: ~/reports/code-coverage
           destination: code-coverage
@@ -125,10 +125,18 @@ jobs:
           path: reports/coverage-xml
           destination: coverage-xml
       - store_artifacts:
+          path: ~/reports/clover.xml
+          destination: clover.xml
+      - store_artifacts:
           path: ~/reports/junit.xml
           destination: junit.xml
       - store_test_results:
           path: ~/reports/junit.xml
+      - run:
+          name: Move clover.xml
+          command: mv ~/reports/clover.xml reports/clover.xml
+      - codecov/upload:
+          file: reports/clover.xml
       - run:
           name: Mutation Tests
           command: |
