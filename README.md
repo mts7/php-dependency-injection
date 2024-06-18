@@ -2,7 +2,7 @@
 
 PHP Dependency Injection Container
 
-[![codecov](https://codecov.io/github/mts7/Benchmarks/graph/badge.svg?token=LYIOQC8NKZ)](https://codecov.io/github/mts7/php-dependency-injection)
+[![codecov](https://codecov.io/github/mts7/Benchmarks/graph/badge.svg?token=RRUCKLXUGS)](https://codecov.io/github/mts7/php-dependency-injection)
 
 ## Installation
 
